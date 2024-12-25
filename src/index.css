@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Thinking Loader Animation */
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: 23px;
+    aspect-ratio: 1;
+    --c: linear-gradient(#ffffff 0 0);
+    --m: radial-gradient(farthest-side, #ffffff 92%, #ffffff00);
+    background: 
+      var(--m) center               /7px 7px,
+      var(--c) left 50% top    -11.5px/4.6px 9.2px, 
+      var(--c) left 50% bottom -11.5px/4.6px 9.2px, 
+      var(--c) top  50% left   -11.5px/9.2px 4.6px, 
+      var(--c) top  50% right  -11.5px/9.2px 4.6px;
+    background-repeat: no-repeat;
+    animation: 
+      l18-1 1.5s infinite,
+      l18-2 1.5s infinite;
+}
+@keyframes l18-1 {
+    30%,
+    70% {background-position: 
+          center,
+          left 50% top    calc(50% - 4.6px),
+          left 50% bottom calc(50% - 4.6px),
+          top  50% left   calc(50% - 4.6px),
+          top  50% right  calc(50% - 4.6px)}
+}
+@keyframes l18-2 {
+    0%,40%   {transform: rotate(0)}
+    60%,100% {transform: rotate(90deg)}
+}

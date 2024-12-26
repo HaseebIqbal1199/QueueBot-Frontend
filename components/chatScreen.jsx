@@ -10,6 +10,7 @@ const ChatScreen = () => {
   const [starter, setstarter] = useState(true);
   const [chatMsg, setchatMsg] = useState([]);
   const [loading, setloading] = useState(false);
+
   const customStyle = {
     lineHeight: '1.5',
     fontSize: '1rem',
@@ -17,6 +18,17 @@ const ChatScreen = () => {
     backgroundColor: 'transparent',
     padding: '20px'
   };
+
+  const customTextStyle = {
+    fontSize: '1rem',
+    lineHeight: '1.6',
+    color: '#E2E8F0',
+    backgroundColor: '#1E293B',
+    padding: '15px',
+    borderRadius: '5px',
+    marginBottom: '10px',
+  };
+
   const lineProps = (lineNumber) => {
     let style = { display: 'block' };
     if (lineNumber === 1) {
@@ -28,6 +40,16 @@ const ChatScreen = () => {
   const handleInput = (e) => {
     setquestionInput(e.target.value);
   };
+
+  const parseResponse = (data) => {
+    // Split the response into code blocks and text based on triple backticks
+    const segments = data.split(/```/g);
+    return segments.map((segment, index) => ({
+      type: index % 2 === 0 ? "text" : "code", // Alternate between text and code
+      content: segment.trim(),
+    }));
+  };
+
   function getanswer(question) {
     setchatMsg((prev) => [...prev, { role: "question", text: question }]);
     fetch(`https://queuebotapi.vercel.app/queuebot?question=${question}`)
@@ -35,11 +57,13 @@ const ChatScreen = () => {
       .then((data) => {
         console.log("Answer", data);
         setquestionInput("");
+        const parsedData = parseResponse(data);
         setchatMsg((prev) => [...prev, { role: "answer", text: data }]);
         setloading(false);
       });
     console.log(question);
   }
+
   return (
     <div className="w-[80%] h-full bg-slate-900 relative">
       {starter && <Starters setquestionInput={setquestionInput} />}
@@ -48,17 +72,46 @@ const ChatScreen = () => {
           return (
             <div
               key={index}
-              className={`${
-                message.role === "question"
-                  ? "bg-sky-600 ml-auto"
-                  : "bg-slate-600 mr-auto bg-opacity-20"
-              } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${
-                message.role === "question" ? "rounded-bl-lg" : "rounded-br-lg"
-              }`}
+              className={`${message.role === "question"
+                ? "bg-sky-600 ml-auto"
+                : "bg-slate-600 mr-auto bg-opacity-20"
+                } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${message.role === "question"
+                  ? "rounded-bl-lg"
+                  : "rounded-br-lg"
+                }`}
             >
-              <pre className="max-w-full text-wrap">
-              {message.role === "question" ? message.text : <SyntaxHighlighter language="java" style={solarizedlight} customStyle={customStyle} showLineNumbers wrapLines lineProps={lineProps}>{(message.text)}</SyntaxHighlighter>}
-              </pre>
+              {message.role === "question" ? (
+                <pre className="max-w-full text-wrap">{message.text}</pre>
+              ) : (
+                message.text.map((segment, i) => (
+                  <div key={i}>
+                    {segment.type === "code" ? (
+                      <SyntaxHighlighter
+                        language="java"
+                        style={solarizedlight}
+                        customStyle={customStyle}
+                        showLineNumbers
+                        wrapLines
+                        lineProps={lineProps}
+                      >
+                        {segment.content}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <div style={customTextStyle}>
+                        {segment.content
+                          .split("\n")
+                          .map((line, idx) =>
+                            line.startsWith("**") ? (
+                              <strong key={idx}>{line}</strong>
+                            ) : (
+                              <p key={idx}>{line}</p>
+                            )
+                          )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           );
         })}

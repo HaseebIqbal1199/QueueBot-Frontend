@@ -55,13 +55,12 @@ const ChatScreen = () => {
     fetch(`https://queuebotapi.vercel.app/queuebot?question=${question}`)
       .then((res) => res.text())
       .then((data) => {
-        console.log("Answer", data);
         setquestionInput("");
         const parsedData = parseResponse(data);
+    
         setchatMsg((prev) => [...prev, { role: "answer", text: parsedData }]);
         setloading(false);
       });
-    console.log(question);
   }
 
   return (
@@ -69,51 +68,52 @@ const ChatScreen = () => {
       {starter && <Starters setquestionInput={setquestionInput} />}
       <div className="h-[85%] box-border py-8 px-40 flex flex-col gap-3 overflow-y-auto">
         {chatMsg.map((message, index) => {
-          return (
+            return (
             <div
               key={index}
               className={`${message.role === "question"
-                ? "bg-sky-600 ml-auto"
-                : "bg-slate-600 mr-auto bg-opacity-20"
-                } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${message.role === "question"
-                  ? "rounded-bl-lg"
-                  : "rounded-br-lg"
-                }`}
+              ? "bg-sky-600 ml-auto"
+              : "bg-slate-600 mr-auto bg-opacity-20"
+              } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${message.role === "question"
+                ? "rounded-bl-lg"
+                : "rounded-br-lg"
+              }`}
             >
+              
               {message.role === "question" ? (
-                <pre className="max-w-full text-wrap">{message.text}</pre>
+              <pre className="max-w-full text-wrap">{message.text}</pre>
               ) : (
-                message.text.map((segment, i) => (
-                  <div key={i}>
-                    {segment.type === "code" ? (
-                      <SyntaxHighlighter
-                        language="java"
-                        style={solarizedlight}
-                        customStyle={customStyle}
-                        showLineNumbers
-                        wrapLines
-                        lineProps={lineProps}
-                      >
-                        {segment.content}
-                      </SyntaxHighlighter>
+              message.text.map((segment, i) => (
+                <div key={i}>
+                {segment.type === "code" ? (
+                  <SyntaxHighlighter
+                  language="java"
+                  style={solarizedlight}
+                  customStyle={customStyle}
+                  showLineNumbers
+                  wrapLines
+                  lineProps={lineProps}
+                  >
+                  {segment.content}
+                  </SyntaxHighlighter>
+                ) : (
+                  <div style={customTextStyle}>
+                  {segment.content
+                    .split("\n")
+                    .map((line, idx) =>
+                    line.startsWith("**") ? (
+                      <strong key={idx}>{line.replace(/\*\*/g, "")}</strong>
                     ) : (
-                      <div style={customTextStyle}>
-                        {segment.content
-                          .split("\n")
-                          .map((line, idx) =>
-                            line.startsWith("**") ? (
-                              <strong key={idx}>{line}</strong>
-                            ) : (
-                              <p key={idx}>{line}</p>
-                            )
-                          )}
-                      </div>
+                      <p key={idx}>{(line.replace(/\*\*/g, "").replace(/\*/g,"•"))}</p>
+                    )
                     )}
                   </div>
-                ))
+                )}
+                </div>
+              ))
               )}
             </div>
-          );
+            );
         })}
       </div>
       <div className="h-fit w-full text-white absolute bottom-0 flex flex-col gap-2 justify-center items-center">

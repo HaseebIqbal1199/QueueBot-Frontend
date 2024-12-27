@@ -58,7 +58,7 @@ const ChatScreen = () => {
         console.log("Answer", data);
         setquestionInput("");
         const parsedData = parseResponse(data);
-        setchatMsg((prev) => [...prev, { role: "answer", text: data }]);
+        setchatMsg((prev) => [...prev, { role: "answer", text: parsedData }]);
         setloading(false);
       });
     console.log(question);

@@ -22,7 +22,7 @@ const Drawer = () => {
       <div className='w-full h-[13%] bg-slate-600/5 rounded-lg'>
         <div className='flex items-center justify-between p-2'></div>
         <div className='flex items-center space-x-3 m-2'>
-          <img src='../public/vite.svg' alt='User Pic' className='w-8 h-8 rounded-full' />
+          <img src='vite.svg' alt='User Pic' className='w-8 h-8 rounded-full' />
           <div className='text-white font-semibold'>Username</div>
           <div className='text-slate-400 text-sm'>Plan: Premium</div>
         </div>

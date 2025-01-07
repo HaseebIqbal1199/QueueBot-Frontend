@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../src/index.css";
-import "../src/font.css"
 import Starters from "./starters";
 import ThinkingLoader from "./thinkingLoader";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";

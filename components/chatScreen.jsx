@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../src/index.css";
 import Starters from "./starters";
 import ThinkingLoader from "./thinkingLoader";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-
-const ChatScreen = () => {
+const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
   const [questionInput, setquestionInput] = useState("");
-  const [starter, setstarter] = useState(true);
-  const [chatMsg, setchatMsg] = useState([]);
   const [loading, setloading] = useState(false);
 
   const customStyle = {
@@ -41,6 +38,15 @@ const ChatScreen = () => {
   const handleInput = (e) => {
     setquestionInput(e.target.value);
   };
+
+  const chatContainerRef = useRef(null); // Ref for the chat container
+
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMsg]);
 
   function getanswer(question) {
     if (!question.trim()) return; // Avoid empty submissions
@@ -86,7 +92,7 @@ const ChatScreen = () => {
                   innerCounter = 0;
                 }
               } else {
-                latestMsg.text.push(`\`\`\`\n${tokenizedData[counter]}\`\`\``);
+                latestMsg.text.push(`\`\`\`${tokenizedData[counter]}\`\`\``);
                 latestMsg.type = "code";
                 counter++;
               }
@@ -100,8 +106,7 @@ const ChatScreen = () => {
             updatedChat[updatedChat.length - 1] = latestMsg;
             return updatedChat;
           });
-        }, 15);
-        console.log(chatMsg);
+        }, 6);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -112,59 +117,72 @@ const ChatScreen = () => {
   return (
     <div className="w-[80%] h-full bg-slate-900 relative">
       {starter && <Starters setquestionInput={setquestionInput} />}
-      <div className="h-[85%] box-border py-8 px-40 flex flex-col gap-3 overflow-y-auto">
-        {chatMsg.map((message, index) => {
-          return (
-            <div
-              key={index}
-              className={`${
-                message.role === "question"
-                  ? "bg-sky-600 ml-auto"
-                  : "bg-slate-600 mr-auto bg-opacity-20"
-              } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${
-                message.role === "question" ? "rounded-bl-lg" : "rounded-br-lg"
-              }`}
-            >
-              {message.type === "code" ? (
-                message.text
-                  .join(" ")
-                  .split(/```/g)
-                  .map((segment, idx) =>
-                    idx % 2 === 0 ? (
-                        // Non-highlighted segment
-                        <pre
-                        className="whitespace-pre-wrap break-words"
-                        key={idx}
-                        >
-                        {segment.split("**").map((part, i) =>
-                          i % 2 === 1 ? <b className="text-2xl" key={i}>{part}</b> : part
-                        )}
-                        </pre>
-                      ) : (
-                      // Highlighted segment
-                      <SyntaxHighlighter
-                        key={idx}
-                        language="java"
-                        style={solarizedlight}
-                        customStyle={customStyle}
-                        showLineNumbers
-                        wrapLines
-                        lineProps={lineProps}
-                      >
-                        {segment}
-                      </SyntaxHighlighter>
-                    )
+      <div
+        ref={chatContainerRef}
+        className="h-[85%] box-border py-8 px-40 flex flex-col gap-3 overflow-y-auto"
+      >
+        {chatMsg.map((message, index) => (
+          <div
+            key={index}
+            className={`${
+              message.role === "question"
+                ? "bg-sky-600 ml-auto"
+                : "bg-slate-600 mr-auto bg-opacity-20"
+            } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${
+              message.role === "question" ? "rounded-bl-lg" : "rounded-br-lg"
+            }`}
+          >
+            {message.type === "code" ? (
+              message.text
+                .join(" ")
+                .split(/```/g)
+                .map((segment, idx) =>
+                  idx % 2 === 0 ? (
+                    <pre
+                      className="whitespace-pre-wrap break-words"
+                      key={idx}
+                    >
+                      {segment.split("**").map((part, i) =>
+                        i % 2 === 1 ? (
+                          <b className="text-2xl" key={i}>
+                            {part.replace("`"," ").replace("`"," ")}
+                          </b>
+                        ) : (
+                          part
+                        )
+                      )}
+                    </pre>
+                  ) : (
+                    <SyntaxHighlighter
+                      key={idx}
+                      language="java"
+                      style={solarizedlight}
+                      customStyle={customStyle}
+                      showLineNumbers
+                      wrapLines
+                      lineProps={lineProps}
+                    >
+                      {segment}
+                    </SyntaxHighlighter>
                   )
-              ) : (
-                <pre className="whitespace-pre-wrap break-words">
-                  {Array.isArray(message.text)
-                    ? message.text.join(" ") // Join array with spaces
-                    : message.text}
-                </pre>
-              )}
-            </div>
-          );
-        })}
+                )
+            ) : (
+              <pre className="whitespace-pre-wrap break-words">
+                {Array.isArray(message.text)
+                  ? message.text.join(" ").split("**").map((part, i) =>
+                    i % 2 === 1 ? (
+                      <b className="text-xl" key={i}>
+                        {part.replace("`"," ").replace("`"," ")}
+                      </b>
+                    ) : (
+                      part
+                    )
+                  ) // Join array with spaces
+                  : message.text}
+              </pre>
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="h-fit w-full text-white absolute bottom-0 flex flex-col gap-2 justify-center items-center">

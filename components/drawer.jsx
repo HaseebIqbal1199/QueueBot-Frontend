@@ -1,5 +1,4 @@
 import React from "react";
-import "../src/fonts.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 

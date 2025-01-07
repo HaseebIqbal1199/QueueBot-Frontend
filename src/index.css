@@ -1,7 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
+.open-sans{
+    font-family: "Open Sans", sans-serif;
+}
+
+pre{
+    font-family: "Open Sans", sans-serif;
+}
 /* Thinking Loader Animation */
 /* HTML: <div class="loader"></div> */
 .loader {

@@ -12,7 +12,7 @@ const Starters = ({setquestionInput}) => {
         />
         <span className="text-center text-white opacity-55 select-none">Tell me Something about your Owner</span>
       </div>
-      <div onClick={()=>{setquestionInput("Show me your analytical Capability")}} className="bg-transparent border-2 border-slate-800 w-[20%] h-full rounded-lg flex flex-col justify-center items-center gap-3 hover:bg-slate-500/10 cursor-pointer ">
+      <div onClick={()=>{setquestionInput("How does the introduction of a new technology, such as AI, change the job market in specific sectors like healthcare or finance?")}} className="bg-transparent border-2 border-slate-800 w-[20%] h-full rounded-lg flex flex-col justify-center items-center gap-3 hover:bg-slate-500/10 cursor-pointer ">
         <img
           width="48"
           height="48"
@@ -30,14 +30,14 @@ const Starters = ({setquestionInput}) => {
         />
         <span className="text-center text-white opacity-55 select-none">Make an image of Evil Hacker</span>
       </div>
-      <div onClick={()=>{setquestionInput("Bubble Sort Algorithm")}} className="bg-transparent border-2 border-slate-800 w-[20%] h-full rounded-lg flex flex-col justify-center items-center gap-3 hover:bg-slate-500/10 cursor-pointer ">
+      <div onClick={()=>{setquestionInput("Write a Bubble sort Program in cpp and explain it!")}} className="bg-transparent border-2 border-slate-800 w-[20%] h-full rounded-lg flex flex-col justify-center items-center gap-3 hover:bg-slate-500/10 cursor-pointer ">
         <img
           width="48"
           height="48"
           src="https://img.icons8.com/fluency/48/bug.png"
           alt="bug"
         />
-        <span className="text-center text-white opacity-55 select-none">Bubble Sort Algorithm</span>
+        <span className="text-center text-white opacity-55 select-none">Coding Problem</span>
       </div>
     </div>
   );

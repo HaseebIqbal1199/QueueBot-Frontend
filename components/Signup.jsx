@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", username: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", username: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 

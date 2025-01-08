@@ -50,29 +50,33 @@ const ChatScreen = ({ chatMsg, setchatMsg, starter, setstarter }) => {
 
   const fetchAnswer = async (question) => {
     if (!question.trim()) return;
-
+  
     setLoading(true);
     setchatMsg((prev) => [...prev, { role: "user", text: question }]);
-
+  
     try {
-      const response = await fetch(
-        `http://localhost:3200/api/chat?question=${encodeURIComponent(question)}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Include the token if required
-          },
-        }
-      );
-
+      const token = localStorage.getItem("token"); // Retrieve the token
+      if (!token) {
+        // Handle case when token is not present
+        throw new Error("No token found. Please log in.");
+      }
+  
+      const response = await fetch("http://localhost:3200/gemini/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`, // Add token here
+        },
+        body: JSON.stringify({ question }),
+      });
+  
       if (!response.ok) {
         throw new Error("Failed to fetch the response from the server.");
       }
-
+  
       const result = await response.json(); // Assuming backend sends JSON response
-      const parsedResponse = parseResponse(result.answer); // Parse the response
-
+      const parsedResponse = parseResponse(result.response); // Parse the response
+  
       setchatMsg((prev) => [...prev, { role: "bot", text: parsedResponse }]);
     } catch (error) {
       console.error("Error fetching answer:", error);
@@ -117,34 +121,38 @@ const ChatScreen = ({ chatMsg, setchatMsg, starter, setstarter }) => {
               message.role === "user" ? "rounded-bl-lg" : "rounded-br-lg"
             }`}
           >
-            {message.text.map((segment, i) => (
-              <div key={i}>
-                {segment.type === "code" ? (
-                  <SyntaxHighlighter
-                    language="javascript"
-                    style={solarizedlight}
-                    customStyle={customStyle}
-                    showLineNumbers
-                    wrapLines
-                    lineProps={lineProps}
-                  >
-                    {segment.content}
-                  </SyntaxHighlighter>
-                ) : (
-                  <div style={customTextStyle}>
-                    {segment.content
-                      .split("\n")
-                      .map((line, idx) =>
-                        line.startsWith("**") ? (
-                          <strong key={idx}>{line}</strong>
-                        ) : (
-                          <p key={idx}>{line}</p>
-                        )
-                      )}
-                  </div>
-                )}
-              </div>
-            ))}
+            {Array.isArray(message.text) ? (
+              message.text.map((segment, i) => (
+                <div key={i}>
+                  {segment.type === "code" ? (
+                    <SyntaxHighlighter
+                      language="javascript"
+                      style={solarizedlight}
+                      customStyle={customStyle}
+                      showLineNumbers
+                      wrapLines
+                      lineProps={lineProps}
+                    >
+                      {segment.content}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <div style={customTextStyle}>
+                      {segment.content
+                        .split("\n")
+                        .map((line, idx) =>
+                          line.startsWith("**") ? (
+                            <strong key={idx}>{line}</strong>
+                          ) : (
+                            <p key={idx}>{line}</p>
+                          )
+                        )}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p>{message.text}</p> // If message.text is not an array, render it directly
+            )}
           </div>
         ))}
       </div>

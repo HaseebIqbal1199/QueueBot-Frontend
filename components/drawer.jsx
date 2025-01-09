@@ -1,7 +1,7 @@
 import React from "react";
 import "../src/index.css";
 
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 
 const Drawer = ({setchatMsg, setstarter}) => {

@@ -58,7 +58,7 @@ const ChatScreen = ({ chatMsg, setchatMsg, starter, setstarter, currentModel }) 
 
    if (currentModel == "Gemma_27B") {
      fetch(
-       `${import.meta.env.VITE_API_URL_DEV}/gemma?question=${encodeURIComponent(
+       `${import.meta.env.VITE_API_URL_PRODUCTION}/gemma?question=${encodeURIComponent(
          question
        )}`
      )
@@ -117,7 +117,7 @@ const ChatScreen = ({ chatMsg, setchatMsg, starter, setstarter, currentModel }) 
    }
    if (currentModel == "deepseek_r1") {
      fetch(
-       `${import.meta.env.VITE_API_URL_DEV}/deepseek/r1?question=${encodeURIComponent(
+       `${import.meta.env.VITE_API_URL_PRODUCTION}/deepseek/r1?question=${encodeURIComponent(
          question
        )}`
      )

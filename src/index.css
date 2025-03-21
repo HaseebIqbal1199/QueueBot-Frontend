@@ -42,3 +42,8 @@ pre{
     0%,40%   {transform: rotate(0)}
     60%,100% {transform: rotate(90deg)}
 }
+
+#InputField
+{
+    field-sizing: content;
+}

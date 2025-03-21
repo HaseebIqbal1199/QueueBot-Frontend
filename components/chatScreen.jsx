@@ -5,7 +5,7 @@ import ThinkingLoader from "./thinkingLoader";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
+const ChatScreen = ({ chatMsg, setchatMsg, starter, setstarter, currentModel }) => {
   const [questionInput, setquestionInput] = useState("");
   const [loading, setloading] = useState(false);
 
@@ -41,7 +41,6 @@ const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
 
   const chatContainerRef = useRef(null); // Ref for the chat container
 
-
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -55,64 +54,142 @@ const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
     setchatMsg((prev) => [...prev, { role: "question", text: question }]);
     setloading(true); // Show loader
 
-    fetch(
-      `https://queuebotapi.vercel.app/queuebot?question=${encodeURIComponent(
-        question
-      )}`
-    )
-      .then((res) => res.text())
-      .then((data) => {
-        let tokenizedData = data.split(/```/g).map((chunk, index) => {
-          return index % 2 === 0 ? chunk.split(" ") : chunk;
-        });
+    console.log(currentModel)
 
-        // Add an empty answer placeholder
-        setchatMsg((prev) => [
-          ...prev,
-          { role: "answer", text: [], type: "text" },
-        ]);
+   if (currentModel == "Gemma_27B") {
+     fetch(
+       `${import.meta.env.VITE_API_URL_DEV}/gemma?question=${encodeURIComponent(
+         question
+       )}`
+     )
+       .then((res) => res.text())
+       .then((data) => {
+         let tokenizedData = data.split(/```/g).map((chunk, index) => {
+           return index % 2 === 0 ? chunk.split(" ") : chunk;
+         });
+ 
+         // Add an empty answer placeholder
+         setchatMsg((prev) => [
+           ...prev,
+           { role: "answer", text: [], type: "text" },
+         ]);
+ 
+         let counter = 0;
+         let innerCounter = 0;
+ 
+         const generationInterval = setInterval(() => {
+           setchatMsg((prev) => {
+             // Copy previous state
+             const updatedChat = [...prev];
+             const latestMsg = { ...updatedChat[updatedChat.length - 1] }; // Clone last message
+ 
+             // Add new tokens incrementally
+             if (counter < tokenizedData.length) {
+               if (Array.isArray(tokenizedData[counter])) {
+                 if (innerCounter < tokenizedData[counter].length) {
+                   latestMsg.text.push(tokenizedData[counter][innerCounter]);
+                   innerCounter++;
+                 } else {
+                   counter++;
+                   innerCounter = 0;
+                 }
+               } else {
+                 latestMsg.text.push(`\`\`\`${tokenizedData[counter]}\`\`\``);
+                 latestMsg.type = "code";
+                 counter++;
+               }
+             } else {
+               clearInterval(generationInterval);
+               setloading(false); // Done processing
+               setquestionInput("");
+             }
+ 
+             // Update state
+             updatedChat[updatedChat.length - 1] = latestMsg;
+             return updatedChat;
+           });
+         }, 6);
+       })
+       .catch((error) => {
+         console.error("Error fetching data:", error);
+         setloading(false);
+       });
+   }
+   if (currentModel == "deepseek_r1") {
+     fetch(
+       `${import.meta.env.VITE_API_URL_DEV}/deepseek/r1?question=${encodeURIComponent(
+         question
+       )}`
+     )
+       .then((res) => res.text())
+       .then((data) => {
+         let tokenizedData = data.split(/```/g).map((chunk, index) => {
+           return index % 2 === 0 ? chunk.split(" ") : chunk;
+         });
+ 
+         // Add an empty answer placeholder
+         setchatMsg((prev) => [
+           ...prev,
+           { role: "answer", text: [], type: "text" },
+         ]);
+ 
+         let counter = 0;
+         let innerCounter = 0;
+ 
+         const generationInterval = setInterval(() => {
+           setchatMsg((prev) => {
+             // Copy previous state
+             const updatedChat = [...prev];
+             const latestMsg = { ...updatedChat[updatedChat.length - 1] }; // Clone last message
+ 
+             // Add new tokens incrementally
+             if (counter < tokenizedData.length) {
+               if (Array.isArray(tokenizedData[counter])) {
+                 if (innerCounter < tokenizedData[counter].length) {
+                   latestMsg.text.push(tokenizedData[counter][innerCounter]);
+                   innerCounter++;
+                 } else {
+                   counter++;
+                   innerCounter = 0;
+                 }
+               } else {
+                 latestMsg.text.push(`\`\`\`${tokenizedData[counter]}\`\`\``);
+                 latestMsg.type = "code";
+                 counter++;
+               }
+             } else {
+               clearInterval(generationInterval);
+               setloading(false); // Done processing
+               setquestionInput("");
+             }
+ 
+             // Update state
+             updatedChat[updatedChat.length - 1] = latestMsg;
+             return updatedChat;
+           });
+         }, 6);
+       })
+       .catch((error) => {
+         console.error("Error fetching data:", error);
+         setloading(false);
+       });
+   }
+   }
 
-        let counter = 0;
-        let innerCounter = 0;
-
-        const generationInterval = setInterval(() => {
-          setchatMsg((prev) => {
-            // Copy previous state
-            const updatedChat = [...prev];
-            const latestMsg = { ...updatedChat[updatedChat.length - 1] }; // Clone last message
-
-            // Add new tokens incrementally
-            if (counter < tokenizedData.length) {
-              if (Array.isArray(tokenizedData[counter])) {
-                if (innerCounter < tokenizedData[counter].length) {
-                  latestMsg.text.push(tokenizedData[counter][innerCounter]);
-                  innerCounter++;
-                } else {
-                  counter++;
-                  innerCounter = 0;
-                }
-              } else {
-                latestMsg.text.push(`\`\`\`${tokenizedData[counter]}\`\`\``);
-                latestMsg.type = "code";
-                counter++;
-              }
-            } else {
-              clearInterval(generationInterval);
-              setloading(false); // Done processing
-              setquestionInput(" ");
-            }
-
-            // Update state
-            updatedChat[updatedChat.length - 1] = latestMsg;
-            return updatedChat;
-          });
-        }, 6);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setloading(false);
-      });
-  }
+  useEffect(() => {
+    const handleEnterevent = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        setstarter(false);
+        getanswer(questionInput);
+        console.log("running");
+      }
+    };
+    window.addEventListener("keydown", handleEnterevent);
+    return () => {
+      window.removeEventListener("keydown", handleEnterevent);
+    };
+  }, [questionInput]);
 
   return (
     <div className="w-[80%] h-full bg-slate-900 relative">
@@ -126,8 +203,8 @@ const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
             key={index}
             className={`${
               message.role === "question"
-                ? "bg-sky-600 ml-auto"
-                : "bg-slate-600 mr-auto bg-opacity-20"
+                ? "bg-sky-600/30 w-full border-2 border-[#ffffff21]"
+                : "bg-slate-00 mr-auto bg-opacity-20"
             } w-fit p-3 text-white rounded-t-lg max-w-[100%] ${
               message.role === "question" ? "rounded-bl-lg" : "rounded-br-lg"
             }`}
@@ -145,7 +222,7 @@ const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
                       {segment.split("**").map((part, i) =>
                         i % 2 === 1 ? (
                           <b className="text-2xl" key={i}>
-                            {part.replace("`"," ").replace("`"," ")}
+                            {part.replace("`", " ").replace("`", " ")}
                           </b>
                         ) : (
                           part
@@ -170,14 +247,14 @@ const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
               <pre className="whitespace-pre-wrap break-words">
                 {Array.isArray(message.text)
                   ? message.text.join(" ").split("**").map((part, i) =>
-                    i % 2 === 1 ? (
-                      <b className="text-xl" key={i}>
-                        {part.replace("`"," ").replace("`"," ")}
-                      </b>
-                    ) : (
-                      part
-                    )
-                  ) // Join array with spaces
+                      i % 2 === 1 ? (
+                        <b className="text-xl" key={i}>
+                          {part.replace("`", " ").replace("`", " ")}
+                        </b>
+                      ) : (
+                        part
+                      )
+                    ) // Join array with spaces
                   : message.text}
               </pre>
             )}
@@ -192,6 +269,7 @@ const ChatScreen = ({chatMsg, setchatMsg, starter, setstarter}) => {
             value={questionInput}
             onInput={handleInput}
             className="resize-none w-[65%] bg-slate-950 text-white p-1 rounded-lg outline-sky-700 border-none"
+            id="InputField"
           ></textarea>
           <button
             className="bg-slate-950 p-3 rounded-lg"
